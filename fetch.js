@@ -1,55 +1,96 @@
-const query = "nature";
-const URL = `https://api.pexels.com/v1/search?query=${query}`;
+const URL = "https://api.pexels.com/v1/search";
+const grid = document.getElementById("grid");
+const firstBtn = document.getElementById("firstBtn");
+const secondBtn = document.getElementById("secondBtn");
+const input = document.getElementById("searchBox");
+
 const API_KEY = "Lr2WC3D2F8dqsOtzIkuBFIZvkXsiL4957dK7Hmuwpe9xmuBee8PwoTm3";
 
-const loadBtn = document.querySelector(".btn-primary");
-const rowContainer = document.querySelector(".row");
-const newValue = {};
-
-const getUrl = () => {
-  fetch(URL, {
-    method: "GET",
+const getImg = (query) => {
+  fetch(URL + "?query=" + query, {
     headers: {
-      "Content-Type": "application/json",
       Authorization: API_KEY,
     },
   })
-    .then((resp) => {
-      console.log(resp);
-      if (!resp.ok) {
-        throw new Error("Errore nella fetch");
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("Errore nella catch");
       }
-      return resp.json();
+      return res.json();
     })
-    .then((data) => {
-      rowContainer.innerHTML = "";
+    .then((photoData) => {
+      grid.innerHTML = "";
+      photoData.photos.forEach((data) => {
+        console.log(data.alt);
 
-      data.photos.forEach((photo) => {
-        const col = document.createElement("div");
-        col.className = "col-md-4";
-        col.innerHTML = `
-        <div class="card mb-4 shadow-sm">
-          <img src="${photo.src.medium}" class="bd-placeholder-img card-img-top" />
-          <div class="card-body">
-            <h5 class="card-title">${photo.photographer}</h5>
-            <p class="card-text">Photo by ${photo.photographer} from Pexels.</p>
-            <div class="d-flex justify-content-between align-items-center">
-              <div class="btn-group">
-                <a href="${photo.url}" target="_blank" class="btn btn-sm btn-outline-secondary">View</a>
-                <button type="button" class="btn btn-sm btn-outline-secondary">Like</button>
-              </div>
-              <small class="text-muted">${photo.id}</small>
-            </div>
-          </div>
-        </div>
-      `;
-        rowContainer.appendChild(col);
+        //DIV-CONTAINER
+        const div = document.createElement("div");
+        div.className = "col-md-4";
+
+        //DIV-CONTAINER-IMG
+        const containerDivImg = document.createElement("div");
+        containerDivImg.className = "card mb-4 shadow-sm";
+
+        //IMG
+        const img = document.createElement("img");
+        img.className = "bd-placeholder-img card-img-top";
+        img.src = data.src.large;
+
+        //CARD-BODY
+        const containerBody = document.createElement("div");
+        containerBody.className = "card-body";
+
+        //H5-BODY
+        const bodyH5 = document.createElement("h5");
+        bodyH5.className = "card-title";
+        bodyH5.innerHTML = data.photographer;
+
+        //P-BODY
+        const bodyP = document.createElement("p");
+        bodyP.className = "card-text";
+        bodyP.innerHTML = data.alt;
+
+        //DIV-VIEW
+        const containerView = document.createElement("div");
+        containerView.className =
+          "d-flex justify-content-between align-items-center";
+
+        //BTN-CONTAINER
+        const btnContainer = document.createElement("div");
+        //BTN-VIEW
+        const btnView = document.createElement("button");
+        btnView.type = "button";
+        btnView.className = "btn  btn-sm btn-outline-secondary";
+        btnView.innerHTML = "view";
+        //BTN-EDIT
+        const btnEdit = document.createElement("button");
+        btnEdit.type = "button";
+        btnEdit.className = "btn  btn-sm btn-outline-secondary";
+        btnEdit.innerHTML = "Edit";
+        //SMALL
+        const small = document.createElement("small");
+        small.className = "text-muted";
+        small.innerHTML = data.id;
+
+        btnContainer.append(btnView, btnEdit);
+        containerView.append(btnContainer, small);
+        containerBody.append(bodyH5, bodyP, containerView);
+        containerDivImg.append(img, containerBody);
+        div.appendChild(containerDivImg);
+        grid.appendChild(div);
       });
     })
     .catch((error) => console.log(error));
 };
 
-window.onload = () => {
-  loadBtn.addEventListener("click", getUrl);
-  getUrl();
+firstBtn.onclick = () => {
+  getImg("city");
+};
+
+secondBtn.onclick = () => {
+  getImg("dogs");
+};
+
+input.onchange = (e) => {
+  getImg(e.target.value);
 };
